@@ -1,0 +1,51 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#14532d">
+    <title>Staff sign in · AgroLink</title>
+    <link rel="stylesheet" href="{% static 'staff.css' %}">
+  </head>
+  <body class="login-body">
+    <main class="login-layout">
+      <section class="login-story">
+        <a class="staff-brand login-brand" href="/">
+          <span class="staff-brand-icon" aria-hidden="true">✳</span>
+          <span>Agro<span>Link</span><small>FIELD SERVICES</small></span>
+        </a>
+        <div class="login-story-copy">
+          <span class="eyebrow">STAFF WORKSPACE</span>
+          <h1>Good work grows when support is connected.</h1>
+          <p>Review assigned cases, record field updates, and keep farmer support moving.</p>
+        </div>
+        <div class="login-story-foot">One farmer. One platform. Shared agricultural services.</div>
+      </section>
+
+      <section class="login-panel" aria-labelledby="login-title">
+        <div class="login-form-wrap">
+          <span class="login-icon" aria-hidden="true">↗</span>
+          <h2 id="login-title">Welcome back</h2>
+          <p class="muted">Sign in with your authorized AgroLink staff account.</p>
+          {% if form.non_field_errors %}
+            <div class="flash-message flash-error" role="alert">{{ form.non_field_errors }}</div>
+          {% endif %}
+          <form method="post" class="form-stack">
+            {% csrf_token %}
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            {% for field in form %}
+              <div class="form-field">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+              </div>
+            {% endfor %}
+            <button type="submit" class="button button-primary button-wide">Sign in to dashboard <span aria-hidden="true">→</span></button>
+          </form>
+          <a class="back-link" href="/">← Back to AgroLink</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

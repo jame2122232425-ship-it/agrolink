@@ -1,0 +1,5 @@
+<article class="stat-card stat-{{ tone|default:'green' }}">
+  <div class="stat-label">{{ label }}</div>
+  <div class="stat-value">{{ value }}</div>
+  {% if hint %}<div class="stat-hint">{{ hint }}</div>{% endif %}
+</article>

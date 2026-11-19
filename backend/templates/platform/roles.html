@@ -1,0 +1,45 @@
+{% extends "platform/base.html" %}
+{% block title %}Platform access roles{% endblock %}
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">ACCESS CONTROL</span>
+      <h1>Platform access roles</h1>
+      <p>Give each administrative staff account only the platform capabilities needed for its work. Role assignments and permission changes are audited.</p>
+    </div>
+    {% if can_manage_roles %}<a class="button button-primary" href="{% url 'platform:role-create' %}">Create role</a>{% endif %}
+  </div>
+
+  <section class="rbac-account-types" aria-label="Account access model">
+    <article><span class="rbac-type-icon rbac-type-admin" aria-hidden="true">SA</span><div><strong>Super Admin</strong><p>Protected platform account type with full platform authority. Can manage staff, roles, reference data, and oversight. Limit to trusted administrators.</p></div></article>
+    <article><span class="rbac-type-icon rbac-type-staff" aria-hidden="true">ST</span><div><strong>Administrative staff</strong><p>Gets platform pages only through the roles below. Case coordination, farm data oversight, and account support are separate capabilities.</p></div></article>
+    <article><span class="rbac-type-icon rbac-type-officer" aria-hidden="true">FO</span><div><strong>Field professionals</strong><p>Agricultural officers, veterinarians, agronomists, and field agents work from the staff case workspace. Specialty and active case assignment limit access.</p></div></article>
+  </section>
+
+  <section class="panel list-panel">
+    <div class="panel-heading">
+      <div><h2>Administrative staff roles</h2><p>{{ role_rows|length }} role{{ role_rows|length|pluralize }} · built-in roles are protected; create a custom role for new responsibilities.</p></div>
+    </div>
+    <div class="table-wrap">
+      <table class="case-table role-table">
+        <thead><tr><th>Platform role</th><th>Staff members</th><th>Capabilities</th><th>Definition</th><th>Assignment</th><th></th></tr></thead>
+        <tbody>
+          {% for role in role_rows %}
+            <tr>
+              <td><strong><a class="table-link" href="{% url 'platform:role-detail' role.pk %}">{{ role.name }}</a></strong><small class="table-sub">{{ role.description|default:"No description recorded." }}</small></td>
+              <td>{{ role.member_count }}</td>
+              <td>{{ role.permission_count }}</td>
+              <td>{% if role.is_system %}<span class="source-tag">Built in</span>{% else %}<span class="source-tag source-tag-custom">Custom</span>{% endif %}</td>
+              <td>{% if role.is_assignable %}<span class="status-pill status-active">Assignable</span>{% else %}<span class="status-pill status-pending">Reserved</span>{% endif %}</td>
+              <td class="table-actions"><a class="button button-quiet" href="{% url 'platform:role-detail' role.pk %}">Manage</a></td>
+            </tr>
+          {% empty %}
+            <tr><td class="table-empty" colspan="6">No roles have been configured yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="page-note">Platform roles can only be assigned to administrative Staff accounts. Officer account types are separate and scoped by professional specialty and active case assignment. A role cannot grant Super Admin access.</p>
+{% endblock %}

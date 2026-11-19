@@ -1,0 +1,47 @@
+            <span class="platform-nav-label">Overview</span>
+            <a href="{% url 'platform:dashboard' %}"{% if request.resolver_match.url_name == "dashboard" %} class="is-active" aria-current="page"{% endif %}>
+              <span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>Dashboard
+            </a>
+
+            {% if request.user.is_superuser or request.user.role == "platform_admin" or perms.accounts.view_farmer_accounts or perms.accounts.view_professional_accounts %}
+              <span class="platform-nav-label">Accounts</span>
+              {% if request.user.is_superuser or request.user.role == "platform_admin" or perms.accounts.view_farmer_accounts %}
+                <a href="{% url 'platform:farmers' %}"{% if request.resolver_match.url_name == "farmers" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M3 20a6 6 0 0 1 12 0M16 5.2a3.2 3.2 0 0 1 0 5.8M18 14a4.5 4.5 0 0 1 3 4.2"/></svg></span>Farmers</a>
+              {% endif %}
+              {% if request.user.is_superuser or request.user.role == "platform_admin" %}
+                <a href="{% url 'platform:staff' %}"{% if request.resolver_match.url_name == "staff" or request.resolver_match.url_name == "staff-create" or request.resolver_match.url_name == "staff-permissions" or request.resolver_match.url_name == "user-roles" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20a7 7 0 0 1 14 0M19 5v6M16 8h6"/></svg></span>Staff management</a>
+              {% endif %}
+              {% if request.user.is_superuser or request.user.role == "platform_admin" or perms.accounts.view_professional_accounts %}
+                <a href="{% url 'platform:professionals' %}"{% if request.resolver_match.url_name == "professionals" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="11" r="2.1"/><path d="M5.5 17a3.5 3.5 0 0 1 7 0M14 10h4M14 14h4"/></svg></span>Professionals</a>
+              {% endif %}
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.role == "platform_admin" %}
+              <span class="platform-nav-label">Access control</span>
+              <a href="{% url 'platform:roles' %}"{% if request.resolver_match.url_name == "roles" or request.resolver_match.url_name == "role-create" or request.resolver_match.url_name == "role-detail" or request.resolver_match.url_name == "role-update" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 14a5 5 0 1 1 4.7-6.7L21 7v4h-3v3h-3v3h-3l-1.2-1.2A5 5 0 0 1 7 14Z"/><circle cx="7" cy="9" r="1"/></svg></span>Roles &amp; permissions</a>
+            {% endif %}
+
+            {% if perms.accounts.view_operational_reports or request.user.is_superuser or request.user.role == "platform_admin" %}
+              <span class="platform-nav-label">Operations</span>
+              <a href="{% url 'platform:reports' %}"{% if request.resolver_match.url_name == "reports" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg></span>Cases and reports</a>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.role == "platform_admin" or perms.accounts.view_farm_oversight %}
+              <span class="platform-nav-label">Data oversight</span>
+              <a href="{% url 'platform:farms' %}"{% if request.resolver_match.url_name == "farms" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-6h6v6M7 11h.01M17 11h.01"/></svg></span>Farms &amp; plots</a>
+              <a href="{% url 'platform:crops' %}"{% if request.resolver_match.url_name == "crops" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 4c-7 .2-12.5 2.4-14.8 7.1-1.6 3.2-.1 6.9 3.4 7.7C14.3 20.1 19.8 13.5 20 4Z"/><path d="M4 21c2.4-5.3 6-8.8 11.1-11.2"/></svg></span>Crops</a>
+              <a href="{% url 'platform:livestock' %}"{% if request.resolver_match.url_name == "livestock" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7 5 4M17 7l2-3M5 10a7 7 0 0 1 14 0v5a6 6 0 0 1-12 0v-2"/><path d="M9 12h.01M15 12h.01M10 16h4M3 12H1M23 12h-2"/></svg></span>Livestock</a>
+            {% endif %}
+
+            {% if request.user.is_superuser or request.user.role == "platform_admin" or perms.accounts.manage_reference_data or perms.accounts.view_admin_audit_log or perms.accounts.manage_community_content %}
+              <span class="platform-nav-label">Governance</span>
+              {% if request.user.is_superuser or request.user.role == "platform_admin" or perms.accounts.manage_reference_data %}
+                <a href="{% url 'platform:reference-data' %}"{% if request.resolver_match.url_name == "reference-data" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="8" cy="5" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="19" r="2"/></svg></span>Reference data</a>
+              {% endif %}
+              {% if request.user.is_superuser or request.user.role == "platform_admin" or perms.accounts.view_admin_audit_log %}
+                <a href="{% url 'platform:audit-log' %}"{% if request.resolver_match.url_name == "audit-log" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="7" cy="5" r="1"/><circle cx="17" cy="12" r="1"/><circle cx="10" cy="19" r="1"/></svg></span>Audit log</a>
+              {% endif %}
+              {% if request.user.is_superuser or request.user.role == "platform_admin" or perms.accounts.manage_community_content %}
+                <a href="{% url 'platform:community-moderation' %}"{% if request.resolver_match.url_name == "community-moderation" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg></span>Community review</a>
+              {% endif %}
+            {% endif %}

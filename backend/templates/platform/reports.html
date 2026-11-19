@@ -1,0 +1,68 @@
+{% extends "platform/base.html" %}
+{% block title %}Report oversight{% endblock %}
+{% block content %}
+  <div class="report-page">
+    <header class="report-hero">
+      <div class="report-hero-copy">
+        <div class="report-breadcrumb"><span>Operations</span><span aria-hidden="true">/</span><strong>Report oversight</strong></div>
+        <span class="eyebrow">FIELD INTELLIGENCE</span>
+        <h1>Agricultural reports</h1>
+        <p>Track issues submitted from farms across Kenya. Open a case in the operations queue to review and coordinate a response.</p>
+      </div>
+      <a class="report-queue-link" href="{% url 'staff:cases' %}">
+        <span class="report-queue-icon" aria-hidden="true">↗</span>
+        <span><strong>Open case queue</strong><small>Assignment and case handling</small></span>
+      </a>
+    </header>
+
+    <section class="report-metrics" aria-label="Report overview">
+      <article class="report-metric report-metric-total"><span class="report-metric-icon" aria-hidden="true">▤</span><div><span>Total reports</span><strong>{{ report_count }}</strong><small>All submissions</small></div></article>
+      <article class="report-metric"><span class="report-metric-icon report-icon-open" aria-hidden="true">◷</span><div><span>Open cases</span><strong>{{ open_report_count }}</strong><small>Awaiting resolution</small></div></article>
+      <article class="report-metric"><span class="report-metric-icon report-icon-critical" aria-hidden="true">!</span><div><span>Critical · open</span><strong>{{ critical_report_count }}</strong><small>Needs urgent attention</small></div></article>
+      <article class="report-metric"><span class="report-metric-icon report-icon-unassigned" aria-hidden="true">⌁</span><div><span>Unassigned</span><strong>{{ unassigned_report_count }}</strong><small>Needs a case owner</small></div></article>
+    </section>
+
+    <section class="report-workspace" aria-labelledby="report-list-title">
+      <div class="report-workspace-heading">
+        <div><span class="eyebrow">SUBMISSION REGISTER</span><h2 id="report-list-title">Reports</h2><p>Search submissions and review their current status and location.</p></div>
+        <span class="report-result-count">{{ page_obj.paginator.count }} matching</span>
+      </div>
+      <form class="report-search" method="get" role="search">
+        <label class="report-search-field" for="report-search"><span aria-hidden="true">⌕</span><input id="report-search" type="search" name="q" value="{{ query }}" placeholder="Search by reference, issue, farmer, or farm"></label>
+        <button class="button button-primary" type="submit">Search reports</button>
+        {% if query %}<a class="report-clear" href="{% url 'platform:reports' %}">Clear search</a>{% endif %}
+      </form>
+      <div class="table-wrap report-table-wrap">
+        <table class="case-table platform-data-table report-table">
+          <thead><tr><th>Report</th><th>Issue</th><th>Farmer</th><th>Farm location</th><th>Severity</th><th>Status</th><th>Submitted</th><th>Response</th></tr></thead>
+          <tbody>
+            {% for report in page_obj %}
+              <tr>
+                <td><strong class="report-reference">{{ report.report_reference }}</strong><span class="cell-subtitle">{{ report.get_category_display }}</span></td>
+                <td><strong class="report-title">{{ report.title }}</strong><span class="cell-subtitle">{{ report.description|truncatechars:76 }}</span></td>
+                <td><strong class="report-person">{{ report.farmer.get_full_name|default:report.farmer.email }}</strong><span class="cell-subtitle">{{ report.farmer.email }}</span></td>
+                <td><strong class="report-farm">{{ report.farm.name }}</strong><span class="cell-subtitle">{{ report.farm.county|default:"County not recorded" }}</span></td>
+                <td><span class="status-pill severity-{{ report.severity }}"><span class="report-pill-dot" aria-hidden="true"></span>{{ report.get_severity_display }}</span></td>
+                <td><span class="status-pill status-{{ report.status }}">{{ report.get_status_display }}</span></td>
+                <td><strong class="report-date">{{ report.submitted_at|date:"j M Y" }}</strong><span class="cell-subtitle">{{ report.submitted_at|date:"H:i" }}</span></td>
+                <td><a class="button button-outline" href="{% url 'staff:case-detail' report.pk %}">Open case</a></td>
+              </tr>
+            {% empty %}
+              <tr><td class="report-empty" colspan="8"><span aria-hidden="true">⌕</span><strong>{% if query %}No reports found{% else %}No reports yet{% endif %}</strong><small>{% if query %}Try another reference, issue, farmer, or farm name.{% else %}New farmer submissions will appear here.{% endif %}</small>{% if query %}<a href="{% url 'platform:reports' %}">Clear search</a>{% endif %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="report-pagination" aria-label="Report pages">
+          <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} reports</span>
+          <div class="report-pagination-actions">
+            {% if page_obj.has_previous %}<a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous page">← Previous</a>{% else %}<span class="is-disabled">← Previous</span>{% endif %}
+            <span class="report-page-number">{{ page_obj.number }} <span>of</span> {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}<a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next page">Next →</a>{% else %}<span class="is-disabled">Next →</span>{% endif %}
+          </div>
+        </nav>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

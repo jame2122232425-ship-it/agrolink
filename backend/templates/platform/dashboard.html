@@ -1,0 +1,153 @@
+{% extends "platform/base.html" %}
+{% block title %}Platform Administration Dashboard{% endblock %}
+{% block content %}
+  <div class="platform-heading">
+    <div class="platform-heading-copy">
+      <span class="eyebrow">{% if is_super_admin %}NATIONAL PLATFORM OVERVIEW{% else %}STAFF OPERATIONS{% endif %}</span>
+      <h1>Platform Administration Dashboard</h1>
+      <p>{% if is_super_admin %}Monitor recorded AgroLink activity and agricultural operations across Kenya.{% else %}Review operational data available to your delegated responsibilities.{% endif %}</p>
+    </div>
+    {% if is_super_admin %}
+      <form class="county-filter" method="get">
+        <div>
+          <label for="county-filter">County view</label>
+          <select id="county-filter" name="county" onchange="this.form.submit()">
+            <option value="">All supported counties</option>
+            {% for county_name in county_choices %}
+              <option value="{{ county_name }}" {% if county == county_name %}selected{% endif %}>{{ county_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <noscript><button class="button button-outline" type="submit">Apply</button></noscript>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if error_message %}
+    <div class="flash-message flash-error" role="alert">{{ error_message }}</div>
+  {% else %}
+    {% if featured_metrics %}
+      <section class="platform-stat-grid" aria-label="Platform statistics">
+        {% for metric in featured_metrics %}
+          <article class="platform-stat-card">
+            <span class="platform-stat-icon tone-{{ metric.icon_tone }}" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                {% if metric.icon == "farmers" %}
+                  <circle cx="9" cy="8" r="3"/><path d="M3.5 19v-1a5.5 5.5 0 0 1 11 0v1z"/><path d="M16 5.5a3 3 0 0 1 0 5.8M18 14a4.5 4.5 0 0 1 2.5 4v1"/>
+                {% elif metric.icon == "farms" %}
+                  <path d="M3 20h18M5 20V9l7-5 7 5v11"/><path d="M9 20v-6h6v6M8 10h.01M16 10h.01"/>
+                {% elif metric.icon == "staff" %}
+                  <circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1z"/><path d="M17 8h4M19 6v4M17 15h4v5h-4z"/>
+                {% elif metric.icon == "professionals" %}
+                  <rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16a3 3 0 0 1 6 0M14 10h4M14 14h4"/>
+                {% elif metric.icon == "reports" %}
+                  <path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/>
+                {% else %}
+                  <circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>
+                {% endif %}
+              </svg>
+            </span>
+            <span class="platform-stat-copy">
+              <span class="platform-stat-label">{{ metric.display_label }}</span>
+              <strong class="platform-stat-value">{{ metric.value }}</strong>
+            </span>
+          </article>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% if can_view_farmers %}
+      <div class="platform-section-grid">
+        <section class="panel platform-chart platform-trend">
+          <div class="panel-heading">
+            <div><h2>Farmer registrations</h2><p>Monthly registrations · last six months</p></div>
+          </div>
+          <div class="trend-chart" role="img" aria-label="Monthly farmer registration counts for the last six months">
+            {% for item in farmer_registrations %}
+              <div class="trend-column">
+                <span class="trend-count">{{ item.count }}</span>
+                <span class="trend-bar-track"><span class="trend-bar" style="height: {{ item.width }}%"></span></span>
+                <span class="trend-month">{{ item.label }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+        {% include "platform/_chart_panel.html" with heading="Farmers by county" subheading="Recorded farmer profile locations" items=county_breakdown %}
+      </div>
+    {% endif %}
+
+    {% if can_view_farm_oversight %}
+      <div class="platform-section-grid">
+        {% include "platform/_chart_panel.html" with heading="Crop distribution" subheading="Most common recorded crop names" items=crop_distribution %}
+        {% include "platform/_chart_panel.html" with heading="Livestock distribution" subheading="Most common recorded animal species" items=livestock_distribution %}
+      </div>
+    {% endif %}
+
+    {% if can_view_operations %}
+      <div class="platform-section-grid">
+        {% include "platform/_chart_panel.html" with heading="Reports by category" subheading="Recorded agricultural reports" items=report_categories %}
+        {% include "platform/_chart_panel.html" with heading="Cases by workflow status" subheading="Recorded report workflow status" items=report_statuses %}
+      </div>
+    {% endif %}
+
+    {% if is_super_admin %}
+      <div class="platform-section-grid platform-recent-grid">
+        <section class="panel platform-chart">
+          <div class="panel-heading">
+            <div><h2>Recent platform activity</h2><p>Recorded administrative changes</p></div>
+            <a class="text-link" href="{% url 'platform:audit-log' %}">Audit log →</a>
+          </div>
+          <div class="audit-list">
+            {% for event in recent_admin_events %}
+              <div class="audit-row">
+                <span class="audit-mark" aria-hidden="true"></span>
+                <div>
+                  <strong>{{ event.display_action }}</strong>
+                  <small>{% if event.actor %}{{ event.actor.get_full_name|default:event.actor.email }}{% else %}Former account{% endif %} · {{ event.created_at|date:"j M Y, H:i" }}</small>
+                  {% if event.target_user %}<p>{{ event.target_user.get_full_name|default:event.target_user.email }}</p>{% endif %}
+                </div>
+              </div>
+            {% empty %}
+              <p class="empty-chart">No administrative actions have been recorded.</p>
+            {% endfor %}
+          </div>
+        </section>
+        <section class="panel platform-chart">
+          <div class="panel-heading">
+            <div><h2>Recent case activity</h2><p>Recorded workflow events; private evidence is not shown</p></div>
+            <a class="text-link" href="{% url 'staff:unassigned' %}">Case queue →</a>
+          </div>
+          <div class="audit-list">
+            {% for event in recent_report_events %}
+              <div class="audit-row">
+                <span class="audit-mark" aria-hidden="true"></span>
+                <div>
+                  <strong>{{ event.get_event_type_display }} · {{ event.report.report_reference }}</strong>
+                  <small>{{ event.created_at|date:"j M Y, H:i" }}{% if event.actor %} · {{ event.actor.get_full_name|default:event.actor.email }}{% endif %}</small>
+                </div>
+              </div>
+            {% empty %}
+              <p class="empty-chart">No case activity has been recorded.</p>
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+
+      <section class="panel recent-panel platform-recent">
+        <div class="panel-heading">
+          <div><h2>Recent cases</h2><p>Case details remain in the existing case-management workflow.</p></div>
+          <a class="text-link" href="{% url 'staff:unassigned' %}">Open case queue →</a>
+        </div>
+        {% include "staff/_case_table.html" with cases=recent_cases %}
+      </section>
+    {% elif not metrics %}
+      <section class="panel platform-empty">
+        <div class="empty-state">
+          <span class="empty-mark" aria-hidden="true">✓</span>
+          <h2>Your Staff workspace is ready</h2>
+          <p>Use the authorized tools in the navigation. Ask a Super Admin if you need another delegated responsibility.</p>
+        </div>
+      </section>
+    {% endif %}
+  {% endif %}
+{% endblock %}

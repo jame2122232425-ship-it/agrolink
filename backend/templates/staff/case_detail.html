@@ -1,0 +1,219 @@
+{% extends "staff/base.html" %}
+{% block title %}{{ report.report_reference }}{% endblock %}
+{% block content %}
+  <div class="breadcrumb-row">
+    {% if is_coordinator %}
+      <a href="{% url 'staff:unassigned' %}">Coordinator queue</a>
+    {% else %}
+      <a href="{% url 'staff:cases' %}">Assigned cases</a>
+    {% endif %}
+    <span aria-hidden="true">/</span><span>{{ report.report_reference }}</span>
+  </div>
+  <div class="case-hero">
+    <div>
+      <div class="case-kicker">{{ report.report_reference }} <span>·</span> {{ report.get_category_display }}</div>
+      <h1>{{ report.title }}</h1>
+      <div class="case-meta-line">
+        <span class="status-pill status-{{ report.status }}">{{ report.get_status_display }}</span>
+        <span class="severity-pill severity-{{ report.severity }}">{{ report.get_severity_display }} severity</span>
+        <span>Submitted {{ report.submitted_at|date:"j M Y, H:i" }}</span>
+      </div>
+    </div>
+    <a class="button button-outline" href="{% url 'staff:case-assignments' report.pk %}">Assignment history <span aria-hidden="true">→</span></a>
+  </div>
+
+  <div class="case-layout">
+    <div class="case-main-column">
+      <section class="panel detail-panel">
+        <div class="panel-heading"><div><h2>Farmer report</h2><p>Original information submitted by the farmer</p></div><span class="source-tag">{{ report.get_source_display }}</span></div>
+        <div class="detail-block">
+          <div class="detail-label">Description</div>
+          <div class="prose">{{ report.description|linebreaksbr }}</div>
+        </div>
+        {% if report.location_details %}
+          <div class="detail-block"><div class="detail-label">Reported location details</div><div>{{ report.location_details|linebreaksbr }}</div></div>
+        {% endif %}
+        {% if report.resolution_summary %}
+          <div class="resolution-box"><strong>Resolution summary</strong><p>{{ report.resolution_summary|linebreaksbr }}</p></div>
+        {% endif %}
+      </section>
+
+      <section class="panel detail-panel">
+        <div class="panel-heading"><div><h2>Farm and related records</h2><p>Records linked to this report</p></div></div>
+        <div class="record-grid">
+          <div class="record-card">
+            <span class="record-label">Farm</span>
+            <strong>{{ report.farm.name }}</strong>
+            <span>
+              {% firstof report.farm.county report.farm.location "Location not recorded" %}
+              {% if report.farm.sub_county %} · {{ report.farm.sub_county }}{% endif %}
+              {% if report.farm.ward %} · {{ report.farm.ward }}{% endif %}
+              {% if report.farm.village %} · {{ report.farm.village }}{% endif %}
+            </span>
+          </div>
+          {% if report.plot %}
+            <div class="record-card"><span class="record-label">Plot</span><strong>{{ report.plot.name }}</strong><span>{{ report.plot.size }} {{ report.farm.get_size_unit_display }} · {{ report.plot.get_soil_type_display }}</span></div>
+          {% endif %}
+          {% if report.crop %}
+            <div class="record-card"><span class="record-label">Linked crop</span><strong>{{ report.crop.crop_name }}{% if report.crop.variety %} · {{ report.crop.variety }}{% endif %}</strong><span>{{ report.crop.get_status_display }}{% if report.crop.growth_stage %} · {{ report.crop.growth_stage.name }}{% endif %}{% if report.crop.planting_date %} · planted {{ report.crop.planting_date|date:"j M Y" }}{% endif %}</span></div>
+          {% endif %}
+          {% if report.livestock_group %}
+            <div class="record-card"><span class="record-label">Linked livestock group</span><strong>{{ report.livestock_group.group_name }}</strong><span>{{ report.livestock_group.species }}{% if report.livestock_group.breed %} · {{ report.livestock_group.breed }}{% endif %} · {{ report.livestock_group.animal_count }} animals</span></div>
+          {% endif %}
+          {% if report.animal %}
+            <div class="record-card"><span class="record-label">Linked animal</span><strong>{{ report.animal.name_or_tag|default:report.animal.identification_number|default:report.animal.species }}</strong><span>{{ report.animal.species }}{% if report.animal.breed %} · {{ report.animal.breed }}{% endif %} · {{ report.animal.get_status_display }}</span></div>
+          {% endif %}
+        </div>
+
+        {% if crop_observations %}
+          <div class="related-records">
+            <h3>Farmer-reported crop observations</h3>
+            {% for observation in crop_observations %}
+              <article class="observation-row"><div class="observation-heading"><strong>{{ observation.observation_date|date:"j M Y" }}</strong><span class="severity-pill severity-{{ observation.severity }}">{{ observation.get_severity_display }}</span></div><p>{{ observation.symptoms_observed|linebreaksbr }}</p>{% if observation.notes %}<small>{{ observation.notes|linebreaksbr }}</small>{% endif %}</article>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if livestock_observations %}
+          <div class="related-records">
+            <h3>Farmer-reported livestock observations</h3>
+            {% for observation in livestock_observations %}
+              <article class="observation-row"><div class="observation-heading"><strong>{{ observation.observation_date|date:"j M Y" }}</strong><span class="severity-pill severity-{{ observation.severity }}">{{ observation.get_severity_display }}</span></div><p>{{ observation.symptoms_reported|linebreaksbr }}</p>{% if observation.farmer_notes %}<small>{{ observation.farmer_notes|linebreaksbr }}</small>{% endif %}</article>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if medical_records %}
+          <div class="related-records">
+            <h3>Recorded vaccination and treatment history</h3>
+            {% for record in medical_records %}
+              <article class="observation-row"><div class="observation-heading"><strong>{{ record.get_record_type_display }} · {{ record.product_or_vaccine }}</strong><span class="date-label">{{ record.administration_date|date:"j M Y" }}</span></div><p>{{ record.get_entry_type_display }}{% if record.dosage %} · {{ record.dosage }} {{ record.dosage_unit }}{% endif %}</p></article>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="panel detail-panel">
+        <div class="panel-heading"><div><h2>Evidence</h2><p>Images attached to this case</p></div><span class="count-chip">{{ evidence|length }}</span></div>
+        {% if can_view_private_evidence %}
+          {% if evidence %}
+            <div class="evidence-list">
+              {% for item in evidence %}
+                <a class="evidence-item" href="{% url 'private-image' resource='report-evidence' pk=item.pk %}" target="_blank" rel="noopener">
+                  <span class="evidence-icon" aria-hidden="true">▧</span>
+                  <span><strong>{{ item.caption|default:"Case evidence image" }}</strong><small>Added {{ item.uploaded_at|date:"j M Y, H:i" }}{% if item.uploaded_by %} · {{ item.uploaded_by.get_full_name|default:item.uploaded_by.email }}{% endif %}</small></span>
+                  <span class="evidence-arrow" aria-hidden="true">↗</span>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="muted-block">No evidence images have been attached.</p>
+          {% endif %}
+        {% else %}
+          <p class="muted-block">Private evidence files are available to the reporting farmer and the active assigned handler.</p>
+        {% endif %}
+      </section>
+
+      <section class="panel detail-panel">
+        <div class="panel-heading"><div><h2>Case updates</h2><p>Farmer and staff activity, including private internal notes</p></div><span class="count-chip">{{ updates|length }}</span></div>
+        <div class="timeline">
+          {% for update in updates %}
+            <article class="timeline-item">
+              <span class="timeline-dot {% if not update.visible_to_farmer %}dot-private{% endif %}"></span>
+              <div class="timeline-content">
+                <div class="timeline-heading"><strong>{{ update.get_update_type_display }}</strong>{% if not update.visible_to_farmer %}<span class="private-tag">Internal only</span>{% endif %}<time>{{ update.created_at|date:"j M Y, H:i" }}</time></div>
+                <p>{{ update.message|linebreaksbr }}</p>
+                <small>{% if update.author %}{{ update.author.get_full_name|default:update.author.email }}{% else %}Former user{% endif %}</small>
+              </div>
+            </article>
+          {% empty %}
+            <div class="empty-inline">No case updates have been recorded yet.</div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="panel detail-panel">
+        <div class="panel-heading"><div><h2>Audit history</h2><p>Recorded report and workflow events</p></div><span class="count-chip">{{ events|length }}</span></div>
+        <div class="audit-list">
+          {% for event in events %}
+            <div class="audit-row">
+              <span class="audit-mark" aria-hidden="true"></span>
+              <div><strong>{{ event.get_event_type_display }}</strong><small>{% if event.actor %}{{ event.actor.get_full_name|default:event.actor.email }}{% else %}System{% endif %} · {{ event.created_at|date:"j M Y, H:i" }}</small>{% if event.details.reason %}<p>{{ event.details.reason|linebreaksbr }}</p>{% endif %}{% if event.details.from or event.details.to %}<small>Status: {{ event.details.from|default:"—" }} → {{ event.details.to|default:"—" }}</small>{% endif %}</div>
+            </div>
+          {% empty %}
+            <div class="empty-inline">No audit events have been recorded.</div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <aside class="case-side-column">
+      <section class="panel side-panel">
+        <div class="panel-heading"><div><h2>Farmer</h2><p>Report contact</p></div></div>
+        <div class="farmer-card">
+          <span class="farmer-avatar" aria-hidden="true">{{ report.farmer.first_name|first|upper }}{{ report.farmer.last_name|first|upper }}</span>
+          <div><strong>{{ report.farmer.get_full_name|default:report.farmer.email }}</strong><small>{{ report.farmer.phone_number|default:"No phone number recorded" }}</small></div>
+        </div>
+        {% if report.farmer.email %}<a class="contact-link" href="mailto:{{ report.farmer.email }}">{{ report.farmer.email }}</a>{% endif %}
+        {% if report.farmer.farmer_profile.county %}
+          <div class="location-box"><span class="record-label">PROFILE LOCATION</span><strong>{{ report.farmer.farmer_profile.county }}</strong><span>{{ report.farmer.farmer_profile.sub_county }}{% if report.farmer.farmer_profile.ward %} · {{ report.farmer.farmer_profile.ward }}{% endif %}</span></div>
+        {% endif %}
+      </section>
+
+      <section class="panel side-panel">
+        <div class="panel-heading"><div><h2>Case status</h2><p>Current workflow state</p></div></div>
+        <div class="status-large status-{{ report.status }}">{{ report.get_status_display }}</div>
+        <p class="side-note">Last updated {{ report.updated_at|date:"j M Y, H:i" }}</p>
+        {% if transition_form and transition_form.fields.new_status.choices %}
+          <form method="post" action="{% url 'staff:case-transition' report.pk %}" class="form-stack compact-form">
+            {% csrf_token %}
+            {% for field in transition_form %}
+              <div class="form-field">{{ field.label_tag }}{{ field }}{% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}</div>
+            {% endfor %}
+            <button type="submit" class="button button-primary button-wide">Update status</button>
+          </form>
+        {% endif %}
+        {% if reopen_form %}
+          <form method="post" action="{% url 'staff:case-reopen' report.pk %}" class="form-stack compact-form reopen-form">
+            {% csrf_token %}
+            <label for="{{ reopen_form.reason.id_for_label }}">Reopen reason</label>
+            {{ reopen_form.reason }}
+            <button type="submit" class="button button-outline button-wide">Reopen case</button>
+          </form>
+        {% endif %}
+      </section>
+
+      {% if can_update_case %}
+        <section class="panel side-panel update-panel">
+          <div class="panel-heading"><div><h2>Add case update</h2><p>Send a farmer reply or add a case note</p></div></div>
+          <form method="post" action="{% url 'staff:case-update' report.pk %}" enctype="multipart/form-data" class="form-stack">
+            {% csrf_token %}
+            {% if update_form.non_field_errors %}<div class="form-errors">{{ update_form.non_field_errors }}</div>{% endif %}
+            {% for field in update_form %}
+              <div class="form-field{% if field.name == 'visible_to_farmer' %} checkbox-field{% endif %}">
+                {% if field.name == "visible_to_farmer" %}{{ field }}{{ field.label_tag }}{% else %}{{ field.label_tag }}{{ field }}{% endif %}
+                {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+                {% if field.name == "image" %}<small class="field-help">JPEG, PNG or WebP; maximum 5 MB.</small>{% endif %}
+                {% if field.name == "visible_to_farmer" %}<small class="field-help">Internal notes are always private to staff.</small>{% endif %}
+              </div>
+            {% endfor %}
+            <button type="submit" class="button button-primary button-wide">Save update</button>
+          </form>
+        </section>
+      {% endif %}
+
+      <section class="panel side-panel">
+        <div class="panel-heading"><div><h2>Assignment</h2><p>Current and previous handlers</p></div></div>
+        {% for assignment in assignments %}
+          {% if assignment.is_active %}
+            <div class="active-assignment">
+              <span class="assignment-indicator"></span>
+              <div><strong>{{ assignment.assigned_user.get_full_name|default:assignment.assigned_user.email }}</strong><small>{{ assignment.assigned_user.get_role_display }} · Assigned {{ assignment.assigned_at|date:"j M Y" }}</small></div>
+            </div>
+          {% endif %}
+        {% empty %}
+          <p class="muted-block">No handler is currently assigned.</p>
+        {% endfor %}
+        {% if can_manage_assignments %}<a class="text-link assignment-link" href="{% url 'staff:case-assignments' report.pk %}">Manage assignments →</a>{% endif %}
+      </section>
+    </aside>
+  </div>
+{% endblock %}

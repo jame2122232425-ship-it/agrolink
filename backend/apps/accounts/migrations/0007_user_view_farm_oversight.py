@@ -1,0 +1,26 @@
+from django.db import migrations
+
+
+class Migration(migrations.Migration):
+    dependencies = [("accounts", "0006_standardize_platform_roles")]
+
+    operations = [
+        migrations.AlterModelOptions(
+            name="user",
+            options={
+                "ordering": ["-date_joined"],
+                "permissions": [
+                    ("coordinate_cases", "Can coordinate agricultural cases"),
+                    ("view_farmer_accounts", "Can view farmer accounts"),
+                    ("manage_farmer_accounts", "Can manage farmer account status"),
+                    ("view_professional_accounts", "Can view professional accounts"),
+                    ("manage_professional_accounts", "Can manage professional account status"),
+                    ("manage_staff_permissions", "Can manage delegated staff permissions"),
+                    ("view_farm_oversight", "Can view farm, crop, and livestock oversight data"),
+                    ("manage_reference_data", "Can manage agricultural reference data"),
+                    ("view_operational_reports", "Can view operational reports"),
+                    ("view_admin_audit_log", "Can view platform administration audit log"),
+                ],
+            },
+        )
+    ]

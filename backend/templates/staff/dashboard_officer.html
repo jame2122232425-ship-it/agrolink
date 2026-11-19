@@ -1,0 +1,30 @@
+{% extends "staff/base.html" %}
+{% block title %}Officer overview{% endblock %}
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">OFFICER WORKSPACE</span>
+      <h1>Good day, {{ request.user.first_name|default:"there" }}</h1>
+      <p>Your current casework and the latest farmer updates.</p>
+    </div>
+    <a class="button button-primary" href="{% url 'staff:cases' %}">View assigned cases <span aria-hidden="true">→</span></a>
+  </div>
+
+  <section class="stat-grid" aria-label="Assigned case statistics">
+    {% include "staff/_stat_card.html" with label="Assigned cases" value=assigned_count hint="Active assignments" tone="green" %}
+    {% include "staff/_stat_card.html" with label="Awaiting review" value=awaiting_review_count hint="Needs your attention" tone="amber" %}
+    {% include "staff/_stat_card.html" with label="In progress" value=in_progress_count hint="Work underway" tone="blue" %}
+    {% include "staff/_stat_card.html" with label="Awaiting farmer" value=awaiting_farmer_count hint="Information requested" tone="cream" %}
+  </section>
+
+  <div class="dashboard-grid">
+    {% include "staff/_breakdown.html" with heading="Assigned case severity" subheading="Only cases currently assigned to you" items=severity_breakdown %}
+    <section class="panel recent-panel">
+      <div class="panel-heading">
+        <div><h2>Recently updated</h2><p>Your latest assigned cases</p></div>
+        <a class="text-link" href="{% url 'staff:cases' %}">All cases →</a>
+      </div>
+      {% include "staff/_case_table.html" with cases=recent_cases %}
+    </section>
+  </div>
+{% endblock %}

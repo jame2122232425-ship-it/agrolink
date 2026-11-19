@@ -1,0 +1,41 @@
+{% extends "staff/base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">{% if page_title == "Unassigned queue" %}COORDINATOR WORKSPACE{% else %}OFFICER WORKSPACE{% endif %}</span>
+      <h1>{{ page_title }}</h1>
+      <p>{% if page_title == "Unassigned queue" %}Find new cases and assign them to eligible staff.{% else %}Cases that are actively assigned to your account.{% endif %}</p>
+    </div>
+    <span class="result-count">{{ page_obj.paginator.count }} case{{ page_obj.paginator.count|pluralize }}</span>
+  </div>
+
+  <section class="panel list-panel">
+    <form method="get" class="filter-form">
+      {% for field in filter_form %}
+        <div class="filter-field">
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="button button-primary filter-submit" type="submit">Filter cases</button>
+      {% if request.GET %}<a class="clear-filters" href="{% if page_title == 'Unassigned queue' %}{% url 'staff:unassigned' %}{% else %}{% url 'staff:cases' %}{% endif %}">Clear</a>{% endif %}
+    </form>
+
+    {% if filter_form.non_field_errors %}<div class="form-errors">{{ filter_form.non_field_errors }}</div>{% endif %}
+    {% if not filter_form.is_valid and filter_form.is_bound %}<div class="form-errors">Review the filters and try again.</div>{% endif %}
+    {% include "staff/_case_table.html" with cases=page_obj.object_list %}
+
+    {% if not page_obj.object_list %}
+      <div class="empty-state"><span class="empty-mark">✓</span><h2>All caught up</h2><p>{{ empty_message }}</p></div>
+    {% endif %}
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="pagination" aria-label="Case pages">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if pagination_query %}&amp;{{ pagination_query }}{% endif %}">← Previous</a>{% else %}<span class="disabled">← Previous</span>{% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if pagination_query %}&amp;{{ pagination_query }}{% endif %}">Next →</a>{% else %}<span class="disabled">Next →</span>{% endif %}
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}

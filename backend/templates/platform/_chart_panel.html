@@ -1,0 +1,15 @@
+<section class="panel platform-chart">
+  <div class="panel-heading">
+    <div><h2>{{ heading }}</h2>{% if subheading %}<p>{{ subheading }}</p>{% endif %}</div>
+  </div>
+  <div class="breakdown-list">
+    {% for item in items %}
+      <div class="breakdown-row">
+        <div class="breakdown-meta"><span>{{ item.label }}</span><strong>{{ item.count }}</strong></div>
+        <div class="breakdown-track"><span class="breakdown-fill" style="width: {{ item.width }}%"></span></div>
+      </div>
+    {% empty %}
+      <p class="empty-chart">No recorded data yet.</p>
+    {% endfor %}
+  </div>
+</section>

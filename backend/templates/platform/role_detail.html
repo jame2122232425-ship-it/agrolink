@@ -1,0 +1,109 @@
+{% extends "platform/base.html" %}
+{% block title %}{{ role.name }}{% endblock %}
+{% block content %}
+  <div class="breadcrumb-row"><a href="{% url 'platform:roles' %}">Roles</a><span>›</span><span>{{ role.name }}</span></div>
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">ROLE · {{ role.slug|upper }}</span>
+      <h1>{{ role.name }}</h1>
+      <p>{{ role.description|default:"No description recorded for this role." }}</p>
+      <div class="role-heading-tags">
+        {% if role.is_system %}<span class="source-tag">System role</span>{% else %}<span class="source-tag source-tag-custom">Custom role</span>{% endif %}
+        {% if role.is_assignable %}<span class="status-pill status-active">Assignable to Staff</span>{% else %}<span class="status-pill status-pending">Reserved · not assignable</span>{% endif %}
+        <span class="source-tag">{{ role.member_count }} member{{ role.member_count|pluralize }}</span>
+      </div>
+    </div>
+    {% if can_manage_roles %}<a class="button button-outline" href="{% url 'platform:role-update' role.pk %}">Edit role details</a>{% endif %}
+  </div>
+
+  <div class="role-layout">
+    <section class="panel role-permissions-panel">
+      <div class="panel-heading">
+        <div><h2>Permission matrix</h2><p>{% if can_edit_permissions %}Choose only the capabilities required for this staff responsibility. Changes take effect immediately and are audited.{% else %}Built-in role permissions are locked. Create a custom role if different access is needed.{% endif %}</p></div>
+      </div>
+      <form class="form-stack platform-form" method="post" action="{% url 'platform:role-permissions' role.pk %}">
+        {% csrf_token %}
+        {% if permission_form.non_field_errors %}<div class="form-errors">{{ permission_form.non_field_errors }}</div>{% endif %}
+        <div class="permission-matrix">
+          {% for group in permission_matrix %}
+            <fieldset class="permission-group">
+              <legend><strong>{{ group.label }}</strong><small>{{ group.description }}</small></legend>
+              <div class="permission-options">
+                {% for permission in group.permissions %}
+                  <label class="permission-option">
+                    <input type="checkbox" name="permissions" value="{{ permission.codename }}"{% if permission.checked %} checked{% endif %}{% if not can_edit_permissions %} disabled{% endif %}>
+                    <span><strong>{{ permission.label }}</strong><small>{{ permission.codename }}</small></span>
+                  </label>
+                {% endfor %}
+              </div>
+            </fieldset>
+          {% endfor %}
+        </div>
+        {% if can_edit_permissions %}
+          <div class="form-field">
+            {{ permission_form.reason.label_tag }}{{ permission_form.reason }}
+            {% if permission_form.reason.help_text %}<small class="field-help">{{ permission_form.reason.help_text }}</small>{% endif %}
+            {% if permission_form.reason.errors %}<div class="field-errors">{{ permission_form.reason.errors }}</div>{% endif %}
+          </div>
+          <div class="form-actions"><button class="button button-primary" type="submit">Save permissions</button></div>
+        {% endif %}
+      </form>
+    </section>
+
+    <div class="role-side">
+      <section class="panel form-panel">
+        <div class="panel-heading">
+          <div><h2>Members</h2><p>Staff accounts currently holding this role.</p></div>
+        </div>
+        <ul class="role-member-list">
+          {% for member in members %}
+            <li>
+              <a href="{% url 'platform:user-detail' 'staff' member.pk %}">
+                <strong>{{ member.get_full_name|default:member.email }}</strong>
+                <small>{{ member.email }}</small>
+              </a>
+              <span class="status-pill status-{{ member.account_status }}">{{ member.get_account_status_display }}</span>
+            </li>
+          {% empty %}
+            <li class="role-member-empty">No Staff accounts hold this role yet.</li>
+          {% endfor %}
+        </ul>
+        {% if role.is_assignable %}
+          <form class="form-stack platform-form" method="post" action="{% url 'platform:role-members' role.pk %}">
+            {% csrf_token %}
+            <div class="form-field permission-checkboxes">
+              {{ member_form.members.label_tag }}{{ member_form.members }}
+              {% if member_form.members.help_text %}<small class="field-help">{{ member_form.members.help_text }}</small>{% endif %}
+              {% if member_form.members.errors %}<div class="field-errors">{{ member_form.members.errors }}</div>{% endif %}
+            </div>
+            <div class="form-field">
+              {{ member_form.reason.label_tag }}{{ member_form.reason }}
+              {% if member_form.reason.help_text %}<small class="field-help">{{ member_form.reason.help_text }}</small>{% endif %}
+              {% if member_form.reason.errors %}<div class="field-errors">{{ member_form.reason.errors }}</div>{% endif %}
+            </div>
+            <div class="form-actions"><button class="button button-primary" type="submit">Update members</button></div>
+          </form>
+        {% else %}
+          <p class="role-reserved-note">This reserved role cannot be assigned to Staff accounts. It exists so the permission matrix always has a complete, auditable reference.</p>
+        {% endif %}
+      </section>
+
+      {% if delete_form %}
+        <section class="panel form-panel danger-panel">
+          <div class="panel-heading">
+            <div><h2>Delete role</h2><p>Roles can only be deleted after every member has been reassigned.</p></div>
+          </div>
+          <form class="form-stack platform-form" method="post" action="{% url 'platform:role-delete' role.pk %}">
+            {% csrf_token %}
+            <div class="form-field">
+              {{ delete_form.reason.label_tag }}{{ delete_form.reason }}
+              {% if delete_form.reason.errors %}<div class="field-errors">{{ delete_form.reason.errors }}</div>{% endif %}
+            </div>
+            <div class="form-field checkbox-field">{{ delete_form.confirm }}{{ delete_form.confirm.label_tag }}</div>
+            <div class="form-actions"><button class="button button-danger" type="submit">Delete role</button></div>
+          </form>
+        </section>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

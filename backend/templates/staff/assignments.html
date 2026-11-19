@@ -1,0 +1,46 @@
+{% extends "staff/base.html" %}
+{% block title %}Assignment history{% endblock %}
+{% block content %}
+  <div class="breadcrumb-row"><a href="{% url 'staff:case-detail' report.pk %}">{{ report.report_reference }}</a><span aria-hidden="true">/</span><span>Assignments</span></div>
+  <div class="page-heading">
+    <div><span class="eyebrow">CASE COORDINATION</span><h1>Assignment history</h1><p>{{ report.title }} · {{ report.get_category_display }}</p></div>
+    <a class="button button-outline" href="{% url 'staff:case-detail' report.pk %}">Back to case</a>
+  </div>
+  <div class="dashboard-grid assignment-grid">
+    {% if can_manage_assignments %}
+      <section class="panel assignment-form-panel">
+        <div class="panel-heading"><div><h2>Assign or transfer</h2><p>Only eligible active professionals are listed.</p></div></div>
+        {% if assignment_form %}
+          <form method="post" class="form-stack">
+            {% csrf_token %}
+            {% if assignment_form.non_field_errors %}<div class="form-errors">{{ assignment_form.non_field_errors }}</div>{% endif %}
+            {% for field in assignment_form %}
+              <div class="form-field">{{ field.label_tag }}{{ field }}{% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}</div>
+            {% endfor %}
+            <button class="button button-primary button-wide" type="submit">Save assignment</button>
+          </form>
+        {% else %}
+          <p class="muted-block">This case cannot currently be assigned.</p>
+        {% endif %}
+      </section>
+    {% endif %}
+    <section class="panel assignment-history-panel">
+      <div class="panel-heading"><div><h2>Case handlers</h2><p>Assignment and transfer audit trail</p></div></div>
+      <div class="assignment-list">
+        {% for assignment in assignments %}
+          <article class="assignment-entry">
+            <span class="assignment-indicator{% if not assignment.is_active %} assignment-ended{% endif %}"></span>
+            <div class="assignment-entry-content">
+              <div class="assignment-title"><strong>{{ assignment.assigned_user.get_full_name|default:assignment.assigned_user.email }}</strong>{% if assignment.is_active %}<span class="status-pill status-in_progress">Active</span>{% else %}<span class="status-pill status-closed">Ended</span>{% endif %}</div>
+              <span>{{ assignment.assigned_user.get_role_display }} · Assigned by {{ assignment.assigned_by.get_full_name|default:assignment.assigned_by.email }}</span>
+              <p><strong>Reason:</strong> {{ assignment.reason|linebreaksbr }}</p>
+              {% if assignment.ended_at %}<small>Ended {{ assignment.ended_at|date:"j M Y, H:i" }}{% if assignment.end_reason %} · {{ assignment.end_reason|linebreaksbr }}{% endif %}</small>{% endif %}
+            </div>
+          </article>
+        {% empty %}
+          <div class="empty-inline">No assignment history is available.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+{% endblock %}

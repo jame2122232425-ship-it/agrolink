@@ -1,0 +1,29 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b3d2c">
+    <title>Access restricted | AgroLink</title>
+    <link rel="stylesheet" href="{% static 'staff.css' %}">
+    <link rel="stylesheet" href="{% static 'platform.css' %}">
+  </head>
+  <body class="staff-body platform-body">
+    <main class="platform-denied-page">
+      <a class="platform-brand denied-brand" href="{% url 'staff:dashboard' %}">
+        <span class="platform-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4c-7 .2-12.5 2.4-14.8 7.1-1.6 3.2-.1 6.9 3.4 7.7C14.3 20.1 19.8 13.5 20 4Z"/><path d="M4 21c2.4-5.3 6-8.8 11.1-11.2"/></svg></span>
+        <span><span class="platform-brand-name">Agro<span>Link</span></span><small>SECURE WORKSPACE</small></span>
+      </a>
+      <section class="platform-denied-card" role="alert">
+        <span class="platform-denied-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17h.01"/></svg></span>
+        <span class="eyebrow">ACCESS RESTRICTED · 403</span>
+        <h1>You don’t have access to this page</h1>
+        <p>{{ message|default:"Your account does not have permission to open this resource." }}</p>
+        <p class="platform-denied-help">Access is controlled by your account type and assigned platform roles. Contact a Super Admin if you need this responsibility for your work.</p>
+        <div class="platform-denied-actions">{% if can_open_staff_workspace %}<a class="button button-primary" href="{% url 'staff:dashboard' %}">Return to workspace</a>{% else %}<a class="button button-primary" href="/">Return to AgroLink home</a>{% endif %}</div>
+      </section>
+      <p class="platform-denied-foot">AgroLink · Secure platform administration</p>
+    </main>
+  </body>
+</html>

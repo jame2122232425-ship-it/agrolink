@@ -1,0 +1,6 @@
+{
+  "name": "AgroLink — Agricultural Design System",
+  "description": "Brand identity, design system, and UI component showcase for AgroLink, an integrated AI-powered agricultural intelligence platform for Kenya.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

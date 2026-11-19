@@ -1,0 +1,27 @@
+{% extends "staff/base.html" %}
+{% block title %}Officer directory{% endblock %}
+{% block content %}
+  <div class="page-heading">
+    <div><span class="eyebrow">COORDINATOR WORKSPACE</span><h1>Eligible professionals</h1><p>Active agricultural staff available for case assignments.</p></div>
+    <a class="button button-outline" href="{% url 'staff:unassigned' %}">View unassigned queue</a>
+  </div>
+  <section class="panel list-panel">
+    <div class="table-wrap">
+      <table class="case-table officer-table">
+        <thead><tr><th>Professional</th><th>Role</th><th>Active cases</th><th>Account</th></tr></thead>
+        <tbody>
+          {% for officer in officers %}
+            <tr>
+              <td><strong>{{ officer.get_full_name|default:officer.email }}</strong><span class="cell-subtitle">{{ officer.email }}</span></td>
+              <td>{{ officer.get_role_display }}</td>
+              <td><span class="count-chip">{{ officer.active_case_count }}</span></td>
+              <td><span class="status-pill status-active">Active</span></td>
+            </tr>
+          {% empty %}
+            <tr><td class="table-empty" colspan="4">No active professionals are available.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

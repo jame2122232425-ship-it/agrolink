@@ -1,0 +1,15 @@
+            <span class="platform-nav-label">Workspace</span>
+            <a href="{% url 'staff:dashboard' %}"{% if request.resolver_match.url_name == "dashboard" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>Overview</a>
+            <a href="{% url 'staff:notifications' %}"{% if request.resolver_match.url_name == "notifications" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span>Notifications{% if staff_unread_notification_count %}<span class="staff-nav-count">{{ staff_unread_notification_count }}</span>{% endif %}</a>
+            {% if request.user.role == "platform_admin" or request.user.is_superuser or perms.accounts.coordinate_cases %}
+              <span class="platform-nav-label">Coordination</span>
+              <a href="{% url 'staff:unassigned' %}"{% if request.resolver_match.url_name == "unassigned" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="8" cy="5" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="19" r="2"/></svg></span>Unassigned queue</a>
+              <a href="{% url 'staff:officers' %}"{% if request.resolver_match.url_name == "officers" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 5 2v3M17 14a4 4 0 0 1 4 4"/></svg></span>Officers</a>
+            {% else %}
+              <span class="platform-nav-label">My casework</span>
+              <a href="{% url 'staff:cases' %}"{% if request.resolver_match.url_name == "cases" or request.resolver_match.url_name == "case-detail" or request.resolver_match.url_name == "case-assignments" %} class="is-active" aria-current="page"{% endif %}><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></svg></span>Assigned cases</a>
+            {% endif %}
+            {% if request.user.role == "platform_admin" or request.user.is_superuser or perms.accounts.view_farmer_accounts or perms.accounts.view_professional_accounts or perms.accounts.view_operational_reports or perms.accounts.view_admin_audit_log or perms.accounts.manage_reference_data %}
+              <span class="platform-nav-label">Administration</span>
+              <a href="{% url 'platform:dashboard' %}"><span class="platform-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg></span>Platform administration</a>
+            {% endif %}

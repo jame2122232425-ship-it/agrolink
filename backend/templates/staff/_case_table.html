@@ -1,0 +1,34 @@
+<div class="table-wrap">
+  <table class="case-table">
+    <thead>
+      <tr>
+        <th>Case</th>
+        <th>Farmer</th>
+        <th>Category</th>
+        <th>Farm location</th>
+        <th>Severity</th>
+        <th>Status</th>
+        <th>Submitted</th>
+        <th>Updated</th>
+        <th><span class="visually-hidden">Open</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for report in cases %}
+        <tr>
+          <td><a class="case-reference" href="{% url 'staff:case-detail' report.pk %}">{{ report.report_reference }}</a><span class="cell-subtitle">{{ report.title }}</span></td>
+          <td>{{ report.farmer.get_full_name|default:report.farmer.email }}</td>
+          <td>{{ report.get_category_display }}</td>
+          <td>{% firstof report.farm.county report.farm.location "—" %}</td>
+          <td><span class="severity-pill severity-{{ report.severity }}">{{ report.get_severity_display }}</span></td>
+          <td><span class="status-pill status-{{ report.status }}">{{ report.get_status_display }}</span></td>
+          <td>{{ report.submitted_at|date:"j M Y" }}</td>
+          <td>{{ report.updated_at|date:"j M Y" }}</td>
+          <td><a class="table-open" href="{% url 'staff:case-detail' report.pk %}" aria-label="Open {{ report.report_reference }}">→</a></td>
+        </tr>
+      {% empty %}
+        <tr><td class="table-empty" colspan="9">No cases to display.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

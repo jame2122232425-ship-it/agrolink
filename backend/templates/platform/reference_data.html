@@ -1,0 +1,109 @@
+{% extends "platform/base.html" %}
+{% block title %}Agricultural reference data{% endblock %}
+{% block content %}
+  <div class="platform-heading reference-heading">
+    <div class="platform-heading-copy">
+      <span class="eyebrow">AGRICULTURAL DATA</span>
+      <h1>Crop growth stages</h1>
+      <p>Manage the stages farmers can select for their crop records. Changes are audited, and existing stages can be deactivated instead of deleted.</p>
+    </div>
+    <div class="reference-heading-stat">
+      <strong>{{ stage_rows|length }}</strong>
+      <span>configured stages</span>
+    </div>
+  </div>
+
+  <div class="reference-layout">
+    <section class="panel reference-list-panel" aria-labelledby="reference-stage-heading">
+      <div class="panel-heading reference-list-heading">
+        <div>
+          <h2 id="reference-stage-heading">Growth stage catalogue</h2>
+          <p>Set the display name, order, and availability shown to farmers.</p>
+        </div>
+        <span class="reference-count">{{ stage_rows|length }} total</span>
+      </div>
+
+      <div class="reference-stage-list">
+        {% for stage, stage_form in stage_rows %}
+          <form class="reference-stage-row" method="post" action="{% url 'platform:reference-data-update' stage.pk %}">
+            {% csrf_token %}
+            <div class="reference-stage-header">
+              <div class="reference-stage-title">
+                <span class="reference-stage-order">#{{ stage.order }}</span>
+                <div>
+                  <h3>{{ stage.name }}</h3>
+                  <span>Crop growth stage</span>
+                </div>
+              </div>
+              <span class="reference-stage-status{% if stage.is_active %} is-active{% endif %}">
+                {% if stage.is_active %}Active{% else %}Inactive{% endif %}
+              </span>
+            </div>
+
+            <div class="reference-stage-fields">
+              <div class="form-field">
+                {{ stage_form.name.label_tag }}{{ stage_form.name }}
+                {% if stage_form.name.errors %}<div class="field-errors">{{ stage_form.name.errors }}</div>{% endif %}
+              </div>
+              <div class="form-field">
+                {{ stage_form.order.label_tag }}{{ stage_form.order }}
+                {% if stage_form.order.errors %}<div class="field-errors">{{ stage_form.order.errors }}</div>{% endif %}
+              </div>
+              <div class="form-field checkbox-field">{{ stage_form.is_active }}{{ stage_form.is_active.label_tag }}</div>
+            </div>
+
+            <div class="reference-stage-footer">
+              <div class="form-field reference-reason">
+                {{ stage_form.reason.label_tag }}{{ stage_form.reason }}
+                {% if stage_form.reason.help_text %}<small class="field-help">{{ stage_form.reason.help_text }}</small>{% endif %}
+                {% if stage_form.reason.errors %}<div class="field-errors">{{ stage_form.reason.errors }}</div>{% endif %}
+              </div>
+              <button class="button button-outline" type="submit">Save changes</button>
+            </div>
+          </form>
+        {% empty %}
+          <div class="reference-empty">
+            <span class="reference-empty-icon" aria-hidden="true">+</span>
+            <h3>No growth stages yet</h3>
+            <p>Add the first stage to make it available in farmer crop records.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="panel reference-create-panel" aria-labelledby="reference-create-heading">
+      <div class="panel-heading reference-create-heading">
+        <div>
+          <span class="reference-create-icon" aria-hidden="true">+</span>
+          <h2 id="reference-create-heading">Add a growth stage</h2>
+          <p>Create a new option for farmer crop records.</p>
+        </div>
+      </div>
+      <form class="reference-create-form" method="post" action="{% url 'platform:reference-data-create' %}">
+        {% csrf_token %}
+        <div class="form-field">
+          {{ form.name.label_tag }}{{ form.name }}
+          {% if form.name.help_text %}<small class="field-help">{{ form.name.help_text }}</small>{% endif %}
+          {% if form.name.errors %}<div class="field-errors">{{ form.name.errors }}</div>{% endif %}
+        </div>
+        <div class="reference-create-fields">
+          <div class="form-field">
+            {{ form.order.label_tag }}{{ form.order }}
+            {% if form.order.errors %}<div class="field-errors">{{ form.order.errors }}</div>{% endif %}
+          </div>
+          <div class="form-field checkbox-field">{{ form.is_active }}{{ form.is_active.label_tag }}</div>
+        </div>
+        <div class="form-field">
+          {{ form.reason.label_tag }}{{ form.reason }}
+          {% if form.reason.help_text %}<small class="field-help">{{ form.reason.help_text }}</small>{% endif %}
+          {% if form.reason.errors %}<div class="field-errors">{{ form.reason.errors }}</div>{% endif %}
+        </div>
+        <div class="reference-audit-note">
+          <span aria-hidden="true">✓</span>
+          <p>A reason is required and recorded in the admin audit log.</p>
+        </div>
+        <button class="button button-primary" type="submit">Add growth stage</button>
+      </form>
+    </section>
+  </div>
+{% endblock %}

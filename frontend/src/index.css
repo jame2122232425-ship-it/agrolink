@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --color-agro-forest: #0F5132;
+  --color-agro-primary: #16804A;
+  --color-agro-fresh: #8DE0A7;
+  --color-agro-cream: #F8F7EC;
+  --color-agro-soft: #F4F7F4;
+  --color-agro-amber: #D99725;
+  --color-agro-text-primary: #1E293B;
+  --color-agro-text-secondary: #64748B;
+  --color-agro-text-muted: #94A3B8;
+
+  --color-agro-success: #16A34A;
+  --color-agro-warning: #F59E0B;
+  --color-agro-error: #DC2626;
+  --color-agro-info: #2563EB;
+
+  --font-display: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+html { font-size: 15px; }
+
+:root {
+  --forest-green: #0F5132;
+  --primary-green: #16804A;
+  --fresh-green: #8DE0A7;
+  --warm-cream: #F8F7EC;
+  --soft-bg: #F4F7F4;
+  --pure-white: #FFFFFF;
+  --harvest-amber: #D99725;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --semantic-success: #16A34A;
+  --semantic-warning: #F59E0B;
+  --semantic-error: #DC2626;
+  --semantic-info: #2563EB;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--soft-bg);
+  color: var(--text-primary);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root { min-height: 100vh; }
+button, input, select, textarea { font: inherit; }
+::selection { color: #103d28; background: #c9efd3; }
+
+.app-page-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 4px 0 20px; border-bottom: 1px solid #e3ebe4; }
+.app-page-header-copy { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+.app-page-icon { width: 46px; height: 46px; display: grid; flex: 0 0 auto; place-items: center; border: 1px solid #d9e9dd; border-radius: 14px; color: #176842; background: linear-gradient(145deg, #edf7ef, #e1f1e5); box-shadow: 0 4px 11px rgba(21, 83, 48, .05); }
+.app-page-icon svg { width: 22px; height: 22px; }
+.app-page-eyebrow { margin: 0 0 3px; color: #43805a; font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.app-page-title { margin: 0; color: #172d22; font-family: var(--font-display); font-size: clamp(22px, 2.1vw, 28px); font-weight: 780; letter-spacing: -.045em; line-height: 1.2; }
+.app-page-description { max-width: 720px; margin: 5px 0 0; color: #6b7a70; font-size: 13px; line-height: 1.6; }
+.app-page-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.app-page-action { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
+@media (max-width: 640px) { .app-page-header { align-items: stretch; flex-direction: column; gap: 13px; padding-bottom: 16px; } .app-page-header-copy { gap: 11px; } .app-page-icon { width: 40px; height: 40px; border-radius: 12px; } .app-page-title { font-size: 21px; } .app-page-description { font-size: 12px; } .app-page-action { flex-wrap: wrap; } }
+
+/* Hide scrollbars on horizontal chip rails without losing scrollability */
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Custom scrollbar for preview panes */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

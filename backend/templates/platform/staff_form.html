@@ -1,0 +1,22 @@
+{% extends "platform/base.html" %}
+{% block title %}Create Staff account{% endblock %}
+{% block content %}
+  <div class="breadcrumb-row"><a href="{% url 'platform:staff' %}">Staff</a><span>›</span><span>Create account</span></div>
+  <div class="page-heading">
+      <div><span class="eyebrow">SUPER ADMIN ACTION</span><h1>Create Staff account</h1><p>Assign only the platform access roles this person needs. Case officers use specialty and case assignment rules in the staff workspace.</p></div>
+  </div>
+  <section class="panel form-panel form-panel-wide">
+    <form class="form-stack platform-form" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <div class="form-field{% if field.name == 'roles' %} permission-checkboxes{% endif %}">
+          {{ field.label_tag }}{{ field }}
+          {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+          {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <div class="form-actions"><button class="button button-primary" type="submit">Create Staff account</button><a class="button button-quiet" href="{% url 'platform:staff' %}">Cancel</a></div>
+    </form>
+  </section>
+{% endblock %}

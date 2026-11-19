@@ -1,0 +1,94 @@
+{% extends "platform/base.html" %}
+{% block title %}Account details{% endblock %}
+{% block content %}
+  <div class="breadcrumb-row"><a href="{{ directory_url }}">{{ category_label }}</a><span>›</span><span>Account details</span></div>
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">{{ category_label|upper }}</span>
+      <h1>{{ target.get_full_name|default:target.email }}</h1>
+      <p>Account information and authorized actions.</p>
+    </div>
+    <span class="status-pill status-{% if target.account_status == 'active' %}active{% else %}{{ target.account_status }}{% endif %}">{{ target.get_account_status_display }}</span>
+  </div>
+  <div class="platform-detail-grid">
+    <section class="panel detail-panel">
+      <div class="panel-heading"><div><h2>Account information</h2><p>Never includes credentials or authentication tokens.</p></div></div>
+      <div class="platform-details">
+        <div><span class="record-label">Email</span><strong>{{ target.email }}</strong></div>
+        <div><span class="record-label">Phone</span><strong>{{ target.phone_number|default:"Not provided" }}</strong></div>
+        <div><span class="record-label">Account type</span><strong>{{ target.get_role_display }}</strong></div>
+        <div><span class="record-label">Registered</span><strong>{{ target.date_joined|date:"j M Y, H:i" }}</strong></div>
+        <div><span class="record-label">Last activity</span><strong>{% if target.last_login %}{{ target.last_login|date:"j M Y, H:i" }}{% else %}Not recorded{% endif %}</strong></div>
+        {% if category == "staff" %}<div><span class="record-label">Platform access</span><strong>{% for assigned_role in assigned_roles %}{{ assigned_role.name }}{% if not forloop.last %}, {% endif %}{% empty %}No admin access role{% endfor %}</strong></div>{% endif %}
+        {% if category == "professionals" %}<div><span class="record-label">Active assigned cases</span><strong>{{ target.active_case_count }}</strong></div>{% endif %}
+        {% if category == "farmers" and target.farmer_profile %}
+          <div><span class="record-label">County</span><strong>{{ target.farmer_profile.county|default:"Not provided" }}</strong></div>
+          <div><span class="record-label">Sub-county</span><strong>{{ target.farmer_profile.sub_county|default:"Not provided" }}</strong></div>
+        {% endif %}
+      </div>
+    </section>
+
+    {% if can_manage %}
+      <section class="panel form-panel">
+        <div class="panel-heading"><div><h2>Account status</h2><p>Changes require confirmation and a recorded reason.</p></div></div>
+        <form class="form-stack platform-form" method="post" action="{% url 'platform:account-status' category target.pk %}">
+          {% csrf_token %}
+          {% for field in status_form %}
+            <div class="form-field{% if field.field.widget.input_type == 'checkbox' %} checkbox-field{% endif %}">
+              {{ field }}{{ field.label_tag }}
+              {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+              {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+            </div>
+          {% endfor %}
+          <button class="button button-primary" type="submit">Save status</button>
+        </form>
+      </section>
+    {% endif %}
+
+    {% if can_manage_roles %}
+      <section class="panel form-panel">
+        <div class="panel-heading"><div><h2>Platform access roles</h2><p>Roles grant named platform capabilities. Changes are audited and take effect immediately.</p></div></div>
+        <div class="assigned-roles">
+          {% for group in assigned_roles %}
+            <a class="role-chip" href="{% if group.platform_role %}{% url 'platform:role-detail' group.platform_role.pk %}{% else %}{% url 'platform:roles' %}{% endif %}">{{ group.name }}</a>
+          {% empty %}
+            <span class="role-chip is-empty">No roles assigned</span>
+          {% endfor %}
+        </div>
+        <form class="form-stack platform-form" method="post" action="{% url 'platform:user-roles' target.pk %}">
+          {% csrf_token %}
+          <div class="form-field permission-checkboxes">
+            {{ role_form.roles.label_tag }}{{ role_form.roles }}
+            {% if role_form.roles.help_text %}<small class="field-help">{{ role_form.roles.help_text }}</small>{% endif %}
+            {% if role_form.roles.errors %}<div class="field-errors">{{ role_form.roles.errors }}</div>{% endif %}
+          </div>
+          <div class="form-field">
+            {{ role_form.reason.label_tag }}{{ role_form.reason }}
+            {% if role_form.reason.help_text %}<small class="field-help">{{ role_form.reason.help_text }}</small>{% endif %}
+            {% if role_form.reason.errors %}<div class="field-errors">{{ role_form.reason.errors }}</div>{% endif %}
+          </div>
+          <div class="form-actions">
+            <button class="button button-primary" type="submit">Save roles</button>
+            <a class="button button-quiet" href="{% url 'platform:roles' %}">Manage roles</a>
+          </div>
+        </form>
+      </section>
+    {% endif %}
+
+    {% if can_reset_password %}
+      <section class="panel form-panel">
+        <div class="panel-heading"><div><h2>Password reset</h2><p>Sends a time-limited reset link through configured email.</p></div></div>
+        <form class="form-stack platform-form" method="post" action="{% url 'platform:account-password-reset' category target.pk %}">
+          {% csrf_token %}
+          {% for field in reset_form %}
+            <div class="form-field{% if field.field.widget.input_type == 'checkbox' %} checkbox-field{% endif %}">
+              {{ field }}{{ field.label_tag }}
+              {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+            </div>
+          {% endfor %}
+          <button class="button button-outline" type="submit">Send reset instructions</button>
+        </form>
+      </section>
+    {% endif %}
+  </div>
+{% endblock %}

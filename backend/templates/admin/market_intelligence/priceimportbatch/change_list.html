@@ -1,0 +1,32 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+  <div class="module" style="margin-bottom: 1rem; padding: 1rem;">
+    <h2>Published market-data coverage</h2>
+    <p>
+      Counties: {{ market_data_coverage.counties_with_observations }} |
+      Markets: {{ market_data_coverage.markets_with_observations }} |
+      Commodities: {{ market_data_coverage.commodities_with_observations }}
+    </p>
+    <p>
+      Crop observations: {{ market_data_coverage.crop_observations }} |
+      Livestock observations: {{ market_data_coverage.livestock_observations }} |
+      Verified: {{ market_data_coverage.verified_observations }} |
+      Estimated: {{ market_data_coverage.estimated_observations }} |
+      Stale: {{ market_data_coverage.stale_observations }}
+    </p>
+    <p>
+      Last successful import: {{ market_data_coverage.latest_success|default:"None" }} |
+      Failed import batches: {{ market_data_coverage.failed_batches }}
+    </p>
+    <p>
+      Counties without observations:
+      {% for county in market_data_coverage.counties_without_observations %}{{ county }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}
+    </p>
+    <p>
+      Sources with failed batches:
+      {% for source in market_data_coverage.sources_with_failed_batches %}{{ source.name }}{% if not forloop.last %}, {% endif %}{% empty %}None{% endfor %}
+    </p>
+  </div>
+  {{ block.super }}
+{% endblock %}

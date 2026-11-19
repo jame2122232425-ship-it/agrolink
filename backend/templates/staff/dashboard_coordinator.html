@@ -1,0 +1,32 @@
+{% extends "staff/base.html" %}
+{% block title %}Coordinator overview{% endblock %}
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">COORDINATOR WORKSPACE</span>
+      <h1>Case coordination</h1>
+      <p>Review incoming cases and connect them with eligible professionals.</p>
+    </div>
+    <a class="button button-primary" href="{% url 'staff:unassigned' %}">Review unassigned queue <span aria-hidden="true">→</span></a>
+  </div>
+
+  <section class="stat-grid stat-grid-coordinator" aria-label="Unassigned queue statistics">
+    {% include "staff/_stat_card.html" with label="Unassigned cases" value=unassigned_count hint="Awaiting case assignment" tone="amber" %}
+    {% for item in severity_breakdown %}
+      {% if item.count %}
+        {% include "staff/_stat_card.html" with label=item.label value=item.count hint="Unassigned by severity" tone="green" %}
+      {% endif %}
+    {% endfor %}
+  </section>
+
+  <div class="dashboard-grid coordinator-grid">
+    {% include "staff/_breakdown.html" with heading="Queue by category" subheading="Unassigned cases only" items=category_breakdown %}
+    <section class="panel recent-panel">
+      <div class="panel-heading">
+        <div><h2>Recently submitted</h2><p>Latest cases in the unassigned queue</p></div>
+        <a class="text-link" href="{% url 'staff:unassigned' %}">Open queue →</a>
+      </div>
+      {% include "staff/_case_table.html" with cases=recent_cases %}
+    </section>
+  </div>
+{% endblock %}

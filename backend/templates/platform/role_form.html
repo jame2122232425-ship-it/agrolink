@@ -1,0 +1,35 @@
+{% extends "platform/base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+  <div class="breadcrumb-row"><a href="{% url 'platform:roles' %}">Roles</a><span>›</span><span>{{ page_title }}</span></div>
+  <div class="page-heading">
+    <div><span class="eyebrow">ACCESS CONTROL</span><h1>{{ page_title }}</h1><p>{% if is_create %}Create a delegated role and choose its initial capabilities.{% else %}Role names and slugs are locked for system roles. Permissions are managed on the role screen.{% endif %}</p></div>
+  </div>
+  <section class="panel form-panel form-panel-wide">
+    <form class="form-stack platform-form" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        {% if field.name == "permissions" %}
+          {% if is_create %}
+            <div class="form-field permission-checkboxes">
+              {{ field.label_tag }}{{ field }}
+              {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+              {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="form-field{% if field.field.widget.input_type == 'checkbox' %} checkbox-field{% endif %}">
+            {{ field }}{{ field.label_tag }}
+            {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+            {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      <div class="form-actions">
+        <button class="button button-primary" type="submit">{{ submit_label }}</button>
+        <a class="button button-quiet" href="{{ back_url }}">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

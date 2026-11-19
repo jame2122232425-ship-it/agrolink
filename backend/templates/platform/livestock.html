@@ -1,0 +1,91 @@
+{% extends "platform/base.html" %}
+{% block title %}Livestock oversight{% endblock %}
+{% block content %}
+  <div class="platform-heading">
+    <div class="platform-heading-copy">
+      <span class="eyebrow">DATA OVERSIGHT</span>
+      <h1>Livestock records</h1>
+      <p>Review livestock groups and individual animals recorded across farms.</p>
+    </div>
+  </div>
+
+  <section class="platform-stat-grid" aria-label="Livestock data totals">
+    <article class="platform-stat-card"><span class="platform-stat-copy"><span class="platform-stat-label">Livestock groups</span><strong class="platform-stat-value">{{ group_count }}</strong></span></article>
+    <article class="platform-stat-card"><span class="platform-stat-copy"><span class="platform-stat-label">Individual animals</span><strong class="platform-stat-value">{{ animal_count }}</strong></span></article>
+  </section>
+
+  <form class="filter-form livestock-search" method="get" role="search">
+    <div class="filter-field">
+      <label for="livestock-search">Search livestock</label>
+      <input id="livestock-search" type="search" name="q" value="{{ query }}" placeholder="Species, tag, farm, or farmer">
+    </div>
+    <button class="button button-outline filter-submit" type="submit">Search</button>
+    {% if query %}<a class="clear-filters" href="{% url 'platform:livestock' %}">Clear</a>{% endif %}
+  </form>
+
+  <section class="panel list-panel livestock-table-panel">
+    <div class="panel-heading"><div><h2>Livestock groups</h2><p>{{ groups_page.paginator.count }} matching groups</p></div></div>
+    <div class="table-wrap">
+      <table class="case-table platform-data-table">
+        <thead><tr><th>Group</th><th>Species &amp; breed</th><th>Farm &amp; farmer</th><th>Animals recorded</th><th>Purpose</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for group in groups_page %}
+            <tr>
+              <td><strong>{{ group.group_name }}</strong></td>
+              <td>{{ group.species }}<span class="cell-subtitle">{{ group.breed|default:"Breed not recorded" }}</span></td>
+              <td>{{ group.farm.name }}<span class="cell-subtitle">{{ group.farm.farmer.get_full_name|default:group.farm.farmer.email }} · {{ group.farm.county|default:"County not recorded" }}</span></td>
+              <td>{{ group.animal_count }}</td>
+              <td>{{ group.production_purpose|default:"—" }}</td>
+              <td><span class="status-pill status-{% if group.is_active %}active{% else %}inactive{% endif %}">{% if group.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td class="table-empty" colspan="6">No livestock groups match your search.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if groups_page.paginator.num_pages > 1 %}
+      <nav class="pagination" aria-label="Livestock group pages">
+        <span>Page {{ groups_page.number }} of {{ groups_page.paginator.num_pages }}</span>
+        <span>
+          {% if groups_page.has_previous %}<a href="?{% if groups_query %}{{ groups_query }}&amp;{% endif %}groups_page={{ groups_page.previous_page_number }}">Previous</a>{% else %}<span class="disabled">Previous</span>{% endif %}
+          &nbsp;·&nbsp;
+          {% if groups_page.has_next %}<a href="?{% if groups_query %}{{ groups_query }}&amp;{% endif %}groups_page={{ groups_page.next_page_number }}">Next</a>{% else %}<span class="disabled">Next</span>{% endif %}
+        </span>
+      </nav>
+    {% endif %}
+  </section>
+
+  <section class="panel list-panel livestock-table-panel">
+    <div class="panel-heading"><div><h2>Individual animals</h2><p>{{ animals_page.paginator.count }} matching animals</p></div></div>
+    <div class="table-wrap">
+      <table class="case-table platform-data-table">
+        <thead><tr><th>Animal / tag</th><th>Species &amp; breed</th><th>Farm &amp; farmer</th><th>Group</th><th>Age</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for animal in animals_page %}
+            <tr>
+              <td><strong>{{ animal.name_or_tag|default:animal.identification_number|default:"Not tagged" }}</strong><span class="cell-subtitle">{{ animal.identification_number|default:"No identification number" }}</span></td>
+              <td>{{ animal.species }}<span class="cell-subtitle">{{ animal.breed|default:"Breed not recorded" }}</span></td>
+              <td>{{ animal.farm.name }}<span class="cell-subtitle">{{ animal.farm.farmer.get_full_name|default:animal.farm.farmer.email }} · {{ animal.farm.county|default:"County not recorded" }}</span></td>
+              <td>{{ animal.group.group_name|default:"—" }}</td>
+              <td>{% if animal.birth_date %}{{ animal.birth_date|timesince }}{% elif animal.estimated_age_months %}{{ animal.estimated_age_months }} months{% else %}—{% endif %}</td>
+              <td><span class="status-pill status-{{ animal.status }}">{{ animal.get_status_display }}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td class="table-empty" colspan="6">No individual animals match your search.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if animals_page.paginator.num_pages > 1 %}
+      <nav class="pagination" aria-label="Individual animal pages">
+        <span>Page {{ animals_page.number }} of {{ animals_page.paginator.num_pages }}</span>
+        <span>
+          {% if animals_page.has_previous %}<a href="?{% if animals_query %}{{ animals_query }}&amp;{% endif %}animals_page={{ animals_page.previous_page_number }}">Previous</a>{% else %}<span class="disabled">Previous</span>{% endif %}
+          &nbsp;·&nbsp;
+          {% if animals_page.has_next %}<a href="?{% if animals_query %}{{ animals_query }}&amp;{% endif %}animals_page={{ animals_page.next_page_number }}">Next</a>{% else %}<span class="disabled">Next</span>{% endif %}
+        </span>
+      </nav>
+    {% endif %}
+  </section>
+{% endblock %}
