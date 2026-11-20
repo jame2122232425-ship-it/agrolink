@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
@@ -86,8 +87,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASES = {
-    "default": {
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+if DATABASE_URL:
+    default_database = dj_database_url.parse(DATABASE_URL, conn_max_age=60)
+    default_database.setdefault("OPTIONS", {}).setdefault("sslmode", "require")
+else:
+    default_database = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("POSTGRES_DB", "agrolink"),
         "USER": os.getenv("POSTGRES_USER", "agrolink_user"),
@@ -97,7 +102,8 @@ DATABASES = {
         "OPTIONS": {"sslmode": os.getenv("POSTGRES_SSLMODE", "prefer")},
         "CONN_MAX_AGE": 60,
     }
-}
+
+DATABASES = {"default": default_database}
 
 AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = ["apps.accounts.backends.ActiveAccountBackend"]
