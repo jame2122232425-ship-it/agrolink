@@ -43,7 +43,7 @@ After creating the service, fill these Render environment variables. The Bluepri
 | `POSTGRES_HOST` | Host from the chosen Supabase connection method |
 | `POSTGRES_PORT` | Port from Supabase, commonly `5432` or `6543` for a pooler |
 | `POSTGRES_SSLMODE` | `require` |
-| `CORS_ALLOWED_ORIGINS` | Exact Vercel frontend origin(s), comma-separated, e.g. `https://agrolink.vercel.app,https://www.example.com`; no trailing slash |
+| `CORS_ALLOWED_ORIGINS` | `https://agrolink-psi-seven.vercel.app` (add other exact frontend origins comma-separated; no trailing slash) |
 | `AI_ENABLED` | `False` to deploy without live AI, or `True` to enable it |
 | `AI_PROVIDER` | `gemini` |
 | `AI_MOCK_MODE` | `False` for real provider calls; `True` only for labeled demo responses |
@@ -51,7 +51,7 @@ After creating the service, fill these Render environment variables. The Bluepri
 | `GEMINI_MODEL` | `gemini-3.5-flash-lite` or another model available to your key |
 | `AI_REQUEST_TIMEOUT_SECONDS` | `30` |
 
-`CORS_ALLOWED_ORIGINS` must include the final Vercel production origin. Add Vercel preview origins only if you intend to use previews against this backend. Django uses the same origins for `CSRF_TRUSTED_ORIGINS`.
+`CORS_ALLOWED_ORIGINS` must include the final Vercel production origin. The Blueprint is preconfigured for `https://agrolink-psi-seven.vercel.app`; add any additional production/custom domains and Vercel preview origins only if they should use this backend. Django uses the same origins for `CSRF_TRUSTED_ORIGINS`.
 
 After the first successful deploy, verify `https://<render-host>/health` and `https://<render-host>/api/v1/health/`. Render's release command applies migrations on deploy. Create the first admin user from the Render Shell with `python manage.py createsuperuser`.
 
@@ -74,7 +74,7 @@ Set this Vercel project environment variable for **Production** (and Preview onl
 
 This value is public in the built browser bundle and must contain only the API origin, never a secret. Redeploy after changing environment variables. `frontend/vercel.json` sends client-side routes to `index.html`.
 
-After Vercel assigns the production domain, add that exact `https://...` origin to Render's `CORS_ALLOWED_ORIGINS`, save the Render variable, and redeploy/restart the backend if prompted.
+If the Vercel production domain changes, update Render's `CORS_ALLOWED_ORIGINS` to include that exact `https://...` origin (without a trailing slash), then redeploy/restart the backend.
 
 ## Environment variable inventory
 

@@ -27,7 +27,7 @@ services:
       - key: POSTGRES_SSLMODE
         value: require
       - key: CORS_ALLOWED_ORIGINS
-        sync: false
+        value: https://agrolink-psi-seven.vercel.app
       - key: AI_ENABLED
         value: "False"
       - key: AI_PROVIDER
